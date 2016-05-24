@@ -17,6 +17,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # `vagrant box outdated`. This is not recommended.
   # config.vm.box_check_update = false
 
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.nested = true
+    libvirt.cpus = 4
+    libvirt.cpu_mode = "custom"
+    libvirt.cpu_model = "SandyBridge"
+    libvirt.memory = 1024
+  end
+  config.vm.provider :libvirt do |p|
+    p.management_network_name = "vagrant-libvirt-new"
+    p.management_network_address = "192.168.124.0/24"
+  end
+  config.vm.network :public_network, :bridge => 'br0', :dev => 'br0', :ip => '10.41.16.210', :netmask => '255.255.0.0'
+  config.vm.provision "shell", inline: <<-SHELL
+    route del default
+    route add default gw 10.41.1.1 eth1
+  SHELL
+
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
@@ -25,7 +42,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
   # config.vm.network "private_network", ip: "192.168.33.10"
-  config.vm.network :public_network, :bridge => 'br0', :dev => 'br0', :ip => '10.41.16.202', :netmask => '255.255.0.0'
+  # config.vm.network :public_network, :bridge => 'br0', :dev => 'eth1', :ip => '10.41.16.204', :netmask => '255.255.0.0'
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
